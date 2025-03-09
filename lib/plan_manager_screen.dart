@@ -23,7 +23,52 @@ class PlanManagerScreen extends StatefulWidget {
 }
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
-  List<String> plans = []; 
+  List<String> plans = [];
+
+  void _openCreatePlanModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create New Plan'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: InputDecoration(labelText: 'Plan Name'),
+                onChanged: (value) {},
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Description'),
+                onChanged: (value) {},
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Date'),
+                onChanged: (value) {},
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  plans.add('New Plan');
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +87,11 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                   );
                 },
               ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openCreatePlanModal,
+        tooltip: 'Create Plan',
+        child: Icon(Icons.add),
       ),
     );
   }
