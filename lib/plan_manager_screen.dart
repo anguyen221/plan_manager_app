@@ -33,6 +33,10 @@ class PlanManagerScreen extends StatefulWidget {
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
   List<Plan> plans = [];
+  
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
 
   void _openCreatePlanModal() {
     showDialog(
@@ -44,16 +48,16 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
+                controller: nameController,
                 decoration: InputDecoration(labelText: 'Plan Name'),
-                onChanged: (value) {},
               ),
               TextField(
+                controller: descriptionController,
                 decoration: InputDecoration(labelText: 'Description'),
-                onChanged: (value) {},
               ),
               TextField(
+                controller: dateController,
                 decoration: InputDecoration(labelText: 'Date'),
-                onChanged: (value) {},
               ),
             ],
           ),
@@ -68,12 +72,15 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
               onPressed: () {
                 setState(() {
                   plans.add(Plan(
-                    name: 'New Plan',
-                    description: 'Description of the plan',
-                    date: '2025-03-10',
+                    name: nameController.text,
+                    description: descriptionController.text,
+                    date: dateController.text,
                     isCompleted: false,
                   ));
                 });
+                nameController.clear();
+                descriptionController.clear();
+                dateController.clear();
                 Navigator.of(context).pop();
               },
               child: Text('Create'),
