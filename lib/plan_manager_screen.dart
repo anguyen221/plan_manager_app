@@ -32,7 +32,7 @@ class PlanManagerScreen extends StatefulWidget {
 }
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
-  List<Plan> plans = []; 
+  List<Plan> plans = [];
 
   void _openCreatePlanModal() {
     showDialog(
@@ -96,10 +96,19 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             : ListView.builder(
                 itemCount: plans.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(plans[index].name),
-                    subtitle: Text('${plans[index].description} - ${plans[index].date}'),
-                    tileColor: plans[index].isCompleted ? Colors.green : Colors.yellow,
+                  return GestureDetector(
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity! < 0) {
+                        setState(() {
+                          plans[index].isCompleted = true;
+                        });
+                      }
+                    },
+                    child: ListTile(
+                      title: Text(plans[index].name),
+                      subtitle: Text('${plans[index].description} - ${plans[index].date}'),
+                      tileColor: plans[index].isCompleted ? Colors.green : Colors.yellow,
+                    ),
                   );
                 },
               ),
