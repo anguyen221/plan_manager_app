@@ -130,6 +130,11 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                     onLongPress: () {
                       _openCreatePlanModal(planToEdit: plans[index]);
                     },
+                    onDoubleTap: () {
+                      setState(() {
+                        plans.removeAt(index);
+                      });
+                    },
                     child: ListTile(
                       title: Text(plans[index].name),
                       subtitle: Text('${plans[index].description} - ${plans[index].date}'),
