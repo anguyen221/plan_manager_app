@@ -38,12 +38,22 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
 
-  void _openCreatePlanModal() {
+  void _openCreatePlanModal({Plan? planToEdit}) {
+    if (planToEdit != null) {
+      nameController.text = planToEdit.name;
+      descriptionController.text = planToEdit.description;
+      dateController.text = planToEdit.date;
+    } else {
+      nameController.clear();
+      descriptionController.clear();
+      dateController.clear();
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Create New Plan'),
+          title: Text(planToEdit != null ? 'Edit Plan' : 'Create New Plan'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -71,19 +81,25 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  plans.add(Plan(
-                    name: nameController.text,
-                    description: descriptionController.text,
-                    date: dateController.text,
-                    isCompleted: false,
-                  ));
+                  if (planToEdit != null) {
+                    planToEdit.name = nameController.text;
+                    planToEdit.description = descriptionController.text;
+                    planToEdit.date = dateController.text;
+                  } else {
+                    plans.add(Plan(
+                      name: nameController.text,
+                      description: descriptionController.text,
+                      date: dateController.text,
+                      isCompleted: false,
+                    ));
+                  }
                 });
                 nameController.clear();
                 descriptionController.clear();
                 dateController.clear();
                 Navigator.of(context).pop();
               },
-              child: Text('Create'),
+              child: Text(planToEdit != null ? 'Update' : 'Create'),
             ),
           ],
         );
@@ -111,6 +127,9 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                         });
                       }
                     },
+                    onLongPress: () {
+                      _openCreatePlanModal(planToEdit: plans[index]);
+                    },
                     child: ListTile(
                       title: Text(plans[index].name),
                       subtitle: Text('${plans[index].description} - ${plans[index].date}'),
@@ -121,7 +140,7 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
               ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _openCreatePlanModal,
+        onPressed: () => _openCreatePlanModal(),
         tooltip: 'Create Plan',
         child: Icon(Icons.add),
       ),
