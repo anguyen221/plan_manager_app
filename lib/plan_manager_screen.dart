@@ -17,13 +17,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class Plan {
+  String name;
+  String description;
+  String date;
+  bool isCompleted;
+
+  Plan({required this.name, required this.description, required this.date, this.isCompleted = false});
+}
+
 class PlanManagerScreen extends StatefulWidget {
   @override
   _PlanManagerScreenState createState() => _PlanManagerScreenState();
 }
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
-  List<String> plans = [];
+  List<Plan> plans = [];
 
   void _openCreatePlanModal() {
     showDialog(
@@ -58,7 +67,12 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  plans.add('New Plan');
+                  plans.add(Plan(
+                    name: 'New Plan',
+                    description: 'Description of the plan',
+                    date: '2025-03-10',
+                    isCompleted: false,
+                  ));
                 });
                 Navigator.of(context).pop();
               },
@@ -82,8 +96,19 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
             : ListView.builder(
                 itemCount: plans.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(plans[index]),
+                  return GestureDetector(
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity! < 0) {
+                        setState(() {
+                          plans[index].isCompleted = true;
+                        });
+                      }
+                    },
+                    child: ListTile(
+                      title: Text(plans[index].name),
+                      subtitle: Text('${plans[index].description} - ${plans[index].date}'),
+                      tileColor: plans[index].isCompleted ? Colors.green : Colors.yellow,
+                    ),
                   );
                 },
               ),
