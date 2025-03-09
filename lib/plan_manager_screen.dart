@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
   runApp(MyApp());
@@ -33,10 +34,13 @@ class PlanManagerScreen extends StatefulWidget {
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
   List<Plan> plans = [];
-  
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
+
+  DateTime selectedDate = DateTime.now();
+
+  Map<DateTime, List<Plan>> plansByDate = {};
 
   void _openCreatePlanModal({Plan? planToEdit}) {
     if (planToEdit != null) {
@@ -113,13 +117,83 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
       appBar: AppBar(
         title: Text('Plan Manager App'),
       ),
-      body: Center(
-        child: plans.isEmpty
-            ? Text('No plans available.')
-            : ListView.builder(
-                itemCount: plans.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
+      body: Column(
+        children: [
+          DragTarget<Plan>(
+            onAcceptWithDetails: (dragDetails) {
+              setState(() {
+                Plan draggedPlan = dragDetails.data;
+                draggedPlan.date = selectedDate.toString().split(' ')[0];
+                if (plansByDate[selectedDate] == null) {
+                  plansByDate[selectedDate] = [];
+                }
+                plansByDate[selectedDate]!.add(draggedPlan);
+              });
+            },
+            builder: (context, candidateData, rejectedData) {
+              return TableCalendar(
+                focusedDay: selectedDate,
+                firstDay: DateTime.utc(2020, 1, 1),
+                lastDay: DateTime.utc(2025, 12, 31),
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    selectedDate = selectedDay;
+                  });
+                },
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, date, focusedDay) {
+                    List<Plan> plansForDay = plansByDate[date] ?? [];
+                    return Container(
+                      margin: EdgeInsets.all(4),
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: focusedDay == date ? Colors.blue.shade100 : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Stack(
+                        children: [
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              '${date.day}',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: Column(
+                              children: plansForDay
+                                  .map((plan) => Text(
+                                        plan.name,
+                                        style: TextStyle(fontSize: 12, color: Colors.blue),
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: plans.length,
+              itemBuilder: (context, index) {
+                return Draggable<Plan>(
+                  data: plans[index],
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      color: Colors.blueAccent,
+                      child: Text(plans[index].name, style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                  childWhenDragging: Container(),
+                  child: GestureDetector(
                     onHorizontalDragEnd: (details) {
                       if (details.primaryVelocity! < 0) {
                         setState(() {
@@ -140,9 +214,12 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                       subtitle: Text('${plans[index].description} - ${plans[index].date}'),
                       tileColor: plans[index].isCompleted ? Colors.green : Colors.yellow,
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _openCreatePlanModal(),
